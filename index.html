@@ -36,6 +36,8 @@ footer{text-align:center;color:#78869d;font-size:10px;padding:16px 4px}
 <div class="field"><label for="ep">エピソードボーナス回数</label><div class="counter"><input id="ep" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="ep" aria-label="エピソードボーナス回数を1回加算">＋1</button></div></div>
 <div class="field"><label for="rize">大喰らいの利世回数</label><div class="counter"><input id="rize" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="rize" aria-label="大喰らいの利世回数を1回加算">＋1</button></div></div>
 <div class="field"><label for="lower">下段リプレイ回数</label><div class="counter"><input id="lower" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="lower" aria-label="下段リプレイ回数を1回加算">＋1</button></div></div>
+<div class="field"><label for="backAT">野良の裏AT突入回数（有馬J非経由）</label><div class="counter"><input id="backAT" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="backAT" aria-label="野良の裏ATを1回加算">＋1</button></div></div>
+<div class="field"><label for="arimaAT">有馬ジャッジメント経由AT回数（除外用）</label><div class="counter"><input id="arimaAT" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="arimaAT" aria-label="有馬ジャッジメント経由ATを1回加算">＋1</button></div></div>
 <div class="field"><label for="pullTry">AT終了後の引戻し確認回数</label><div class="counter"><input id="pullTry" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="pullTry" aria-label="AT終了後の引戻し確認回数を1回加算">＋1</button></div></div>
 <div class="field"><label for="pullHit">引戻し成功回数</label><div class="counter"><input id="pullHit" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="pullHit" aria-label="引戻し成功回数を1回加算">＋1</button></div></div>
 </div>
@@ -51,7 +53,7 @@ footer{text-align:center;color:#78869d;font-size:10px;padding:16px 4px}
 <div class="note" id="eventLog">イベント記録はありません。</div>
 </div>
 <div class="actions"><button class="btn primary" id="calc">判別する</button><button class="btn" id="reset">リセット</button></div>
-<p class="note">※開始時の累計ゲーム数から現在の累計ゲーム数までを対象に、CZ中・AT中のゲーム数を除外して通常時ゲーム数を算出します。CZ突入・AT突入回数もイベント記録から自動集計します。</p>
+<p class="note">※開始時の累計ゲーム数から現在の累計ゲーム数までを対象に、CZ中・AT中のゲーム数を除外して通常時ゲーム数を算出します。CZ突入・AT突入回数もイベント記録から自動集計します。野良裏ATは有馬ジャッジメント非経由のAT初当たりだけを＋1で記録し、有馬J経由ATがあれば右隣の除外用カウンターで記録してください。</p>
 </section>
 
 <section class="panel" id="result">
@@ -68,22 +70,22 @@ footer{text-align:center;color:#78869d;font-size:10px;padding:16px 4px}
 </section>
 <section class="panel">
 <h2>判別の見方・注意点</h2>
-<span class="pill">AT初当たり</span><span class="pill">CZ確率</span><span class="pill">エピソードボーナス</span><span class="pill">大喰らいの利世</span><span class="pill">引戻し率</span><span class="pill">下段リプレイ</span>
-<p class="note">表示値は、各設定の公表確率を使った簡易ベイズ推定です。設定の事前確率は1〜6を均等とし、各項目を独立に近似して計算しています。実際には抽選契機や状態の影響があるため、厳密なメーカー公式判別値ではありません。サンプルが少ない場合や、特定の演出・示唆がある場合は、数値だけで判断しないでください。確定系の設定示唆はこの確率計算に含めていません。</p>
+<span class="pill">AT初当たり</span><span class="pill">CZ確率</span><span class="pill">エピソードボーナス</span><span class="pill">大喰らいの利世</span><span class="pill">引戻し率</span><span class="pill">下段リプレイ</span><span class="pill">野良裏AT</span>
+<p class="note">野良裏ATは有馬貴将ジャッジメント非経由のAT初当たり時を対象とし、設定1〜6の突入率1.10%・1.32%・1.63%・2.19%・2.85%・3.32%を使って推定します。有馬ジャッジメント経由ATは対象回数から除外します。裏ATの設定差は低頻度のため、推定への反映は0.75倍に弱めています。<br>表示値は、各設定の公表確率を使った簡易ベイズ推定です。設定の事前確率は1〜6を均等とし、各項目を独立に近似して計算しています。実際には抽選契機や状態の影響があるため、厳密なメーカー公式判別値ではありません。サンプルが少ない場合や、特定の演出・示唆がある場合は、数値だけで判断しないでください。確定系の設定示唆はこの確率計算に含めていません。</p>
 </section>
 <footer>データはこの端末のブラウザ内に保存されます。別端末・別ブラウザとは共有されません。</footer>
 </main>
 <script>
 const $=id=>document.getElementById(id);
 const settings=[
- {s:1,cz:262.6,at:394.4,ep:6620.2,rize:2079.1,lower:1260.3,pull:.0781,rate:97.5},
- {s:2,cz:255.6,at:380.5,ep:5879.7,rize:1906.5,lower:1213.6,pull:.0781,rate:99.0},
- {s:3,cz:246.5,at:357.0,ep:5114.5,rize:1722.8,lower:1170.3,pull:.0938,rate:101.6},
- {s:4,cz:233.1,at:325.9,ep:4062.5,rize:1478.9,lower:1129.9,pull:.1094,rate:105.6},
- {s:5,cz:216.4,at:291.2,ep:3166.7,rize:1226.6,lower:1092.3,pull:.1250,rate:110.3},
- {s:6,cz:203.7,at:261.3,ep:2639.5,rize:1074.9,lower:1024.0,pull:.1523,rate:114.9}
+ {s:1,cz:262.6,at:394.4,ep:6620.2,rize:2079.1,lower:1260.3,pull:.0781,back:.0110,rate:97.5},
+ {s:2,cz:255.6,at:380.5,ep:5879.7,rize:1906.5,lower:1213.6,pull:.0781,back:.0132,rate:99.0},
+ {s:3,cz:246.5,at:357.0,ep:5114.5,rize:1722.8,lower:1170.3,pull:.0938,back:.0163,rate:101.6},
+ {s:4,cz:233.1,at:325.9,ep:4062.5,rize:1478.9,lower:1129.9,pull:.1094,back:.0219,rate:105.6},
+ {s:5,cz:216.4,at:291.2,ep:3166.7,rize:1226.6,lower:1092.3,pull:.1250,back:.0285,rate:110.3},
+ {s:6,cz:203.7,at:261.3,ep:2639.5,rize:1074.9,lower:1024.0,pull:.1523,back:.0332,rate:114.9}
 ];
-const ids=['games','cz','at','ep','rize','lower','pullTry','pullHit'];
+const ids=['games','cz','at','ep','rize','lower','pullTry','pullHit','backAT','arimaAT'];
 let eventHistory=[];
 let manualCZ=0, manualAT=0;
 const eventNames={czStart:'CZ突入',atStart:'AT突入',atEnd:'AT終了',czMiss:'CZスルー（8G）'};
@@ -154,8 +156,10 @@ function logPois(k,lambda){if(lambda<=0)return k===0?0:-Infinity;return k*Math.l
 function lgamma(z){let p=[676.5203681218851,-1259.1392167224028,771.3234287776531,-176.6150291621406,12.507343278686905,-.13857109526572012,9.984369578019572e-6,1.5056327351493116e-7];if(z<.5)return Math.log(Math.PI)-Math.log(Math.sin(Math.PI*z))-lgamma(1-z);z-=1;let x=.99999999999980993;for(let i=0;i<p.length;i++)x+=p[i]/(z+i+1);let t=z+p.length-.5;return .5*Math.log(2*Math.PI)+(z+.5)*Math.log(t)-t+Math.log(x)}
 function logBin(k,n,p){if(k>n||p<=0||p>=1)return -Infinity;return lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p)}
 function calculate(){
- const g=val('games'), cz=val('cz'), at=val('at'), ep=val('ep'), rz=val('rize'), lo=val('lower'), pt=val('pullTry'), ph=val('pullHit');
+ const g=val('games'), cz=val('cz'), at=val('at'), ep=val('ep'), rz=val('rize'), lo=val('lower'), pt=val('pullTry'), ph=val('pullHit'), back=val('backAT'), arima=val('arimaAT'), eligibleAT=Math.max(0,at-arima);
  if(ph>pt){$('status').textContent='入力エラー：引戻し成功回数は確認回数以下にしてください。';return}
+ if(arima>at){$('status').textContent='入力エラー：有馬ジャッジメント経由AT回数はAT初当たり回数以下にしてください。';return}
+ if(back>eligibleAT){$('status').textContent='入力エラー：野良裏AT回数は有馬J非経由のAT初当たり回数以下にしてください。';return}
  if(g===0&&pt===0){$('status').textContent='通常時ゲーム数または引戻し確認回数を入力してください。';return}
  let logs=settings.map(x=>{
   let l=0;
@@ -168,6 +172,7 @@ function calculate(){
    l+=.65*logPois(lo,g/x.lower);
   }
   if(pt>0)l+=logBin(ph,pt,x.pull);
+  if(eligibleAT>0)l+=.75*logBin(back,eligibleAT,x.back);
   return l;
  });
  let max=Math.max(...logs), weights=logs.map(x=>Math.exp(x-max)), sum=weights.reduce((a,b)=>a+b,0), probs=weights.map(x=>x/sum*100);
@@ -176,14 +181,14 @@ function calculate(){
  $('meter').innerHTML=probs.map((p,i)=>`<div class="seg" style="width:${p}%;background:${['#64748b','#8494ad','#4d9b9a','#d19a48','#df704c','#d84b62'][i]}"></div>`).join('');
  $('legend').innerHTML=probs.map((p,i)=>`<div><small>設定${i+1}</small><b>${p.toFixed(1)}%</b></div>`).join('');
  $('bars').innerHTML=probs.map((p,i)=>`<div class="r"><b>設定${i+1}</b><div class="track"><div class="fill" style="width:${p}%"></div></div><div class="pct">${p.toFixed(1)}%</div></div>`).join('');
- let evidence=[];if(g>0){evidence.push(`${g.toLocaleString()}G`);evidence.push(`CZ ${cz}回`);evidence.push(`AT ${at}回`)}if(pt>0)evidence.push(`引戻し ${ph}/${pt}回`);
+ let evidence=[];if(g>0){evidence.push(`${g.toLocaleString()}G`);evidence.push(`CZ ${cz}回`);evidence.push(`AT ${at}回`)}if(pt>0)evidence.push(`引戻し ${ph}/${pt}回`);if(eligibleAT>0||back>0)evidence.push(`野良裏AT ${back}/${eligibleAT}回`);
  $('status').textContent='入力データ：'+evidence.join('・')+'。推定比率は入力値と均等事前確率に基づく目安です。';
  save();
 }
 function save(){let d={};ids.forEach(id=>d[id]=$(id).value);d.startTotal=$('startTotal').value;d.currentTotal=$('currentTotal').value;d.eventHistory=eventHistory;d.manualCZ=manualCZ;d.manualAT=manualAT;try{localStorage.setItem('tgSettingData',JSON.stringify(d))}catch(e){}}
 function load(){try{let d=JSON.parse(localStorage.getItem('tgSettingData')||'{}');ids.forEach(id=>{if(id!=='games'&&d[id]!==undefined)$(id).value=d[id]});if(d.startTotal!==undefined)$('startTotal').value=d.startTotal;if(d.currentTotal!==undefined)$('currentTotal').value=d.currentTotal;if(Array.isArray(d.eventHistory))eventHistory=d.eventHistory;manualCZ=Number(d.manualCZ)||0;manualAT=Number(d.manualAT)||0;}catch(e){}}
 // Save every field immediately so navigation/reload does not discard recent input.
-['startTotal','currentTotal','ep','rize','lower','pullTry','pullHit'].forEach(id=>{
+['startTotal','currentTotal','ep','rize','lower','pullTry','pullHit','backAT','arimaAT'].forEach(id=>{
   $(id).addEventListener('input',()=>{save();refreshLive();});
   $(id).addEventListener('change',()=>{save();refreshLive();});
 });
