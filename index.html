@@ -41,13 +41,13 @@ footer{text-align:center;color:#78869d;font-size:10px;padding:16px 4px}
 </div>
 <div class="panel" style="margin:14px 0 0;padding:14px;background:#101a2c">
 <h2>遊技中のイベント記録</h2>
-<div class="field"><label for="eventTotal">イベント発生時の累計ゲーム数（G）</label><input id="eventTotal" type="number" min="0" step="1" placeholder="例：1250"></div>
+<div class="field"><label for="eventTotal">イベント発生時の累計ゲーム数（G）</label><input id="eventTotal" type="number" min="0" step="1" placeholder="CZ突入・AT突入・AT終了時に入力"></div>
 <div class="grid" style="margin-top:10px">
 <button class="btn" id="czStart">CZ突入</button><button class="btn" id="atStart">AT突入</button>
-<button class="btn" id="atEnd">AT終了</button><button class="btn" id="czMiss">CZ終了（AT非当選）</button>
+<button class="btn" id="atEnd">AT終了</button><button class="btn" id="czMiss">CZスルー（8G自動加算）</button>
 </div>
 <div class="actions"><button class="btn" id="undoEvent">直前の記録を取り消す</button></div>
-<p class="note" id="eventStatus">開始時の累計ゲーム数を入力し、イベント発生時にその時点の累計ゲーム数を記録してください。</p>
+<p class="note" id="eventStatus">CZ突入・AT突入・AT終了時は累計ゲーム数を入力してください。CZスルーはCZ突入から8Gを自動加算するため、ゲーム数入力は不要です。</p>
 <div class="note" id="eventLog">イベント記録はありません。</div>
 </div>
 <div class="actions"><button class="btn primary" id="calc">判別する</button><button class="btn" id="reset">リセット</button></div>
@@ -63,8 +63,8 @@ footer{text-align:center;color:#78869d;font-size:10px;padding:16px 4px}
 
 <section class="panel">
 <h2>設定別の公表数値</h2>
-<table><thead><tr><th>設定</th><th>CZ</th><th>AT初当り</th><th>機械割</th></tr></thead><tbody id="spec"></tbody></table>
-<p class="note">数値は公開解析情報をもとに掲載。機械割は公表値であり、実戦結果を保証するものではありません。</p>
+<table><thead><tr><th>設定</th><th>CZ公表</th><th>CZ実戦</th><th>AT公表</th><th>AT実戦</th><th>機械割</th></tr></thead><tbody id="spec"></tbody></table>
+<p class="note">「実戦」は現在の通常時ゲーム数÷CZ回数・AT初当たり回数で算出します。大喰らいの利世はCZ回数に加算せず、独立して集計します。全設定行に同じ実戦値を表示し、公表値と比較できます。回数が0の場合は「—」と表示します。機械割は公表値であり、実戦結果を保証するものではありません。</p>
 </section>
 <section class="panel">
 <h2>判別の見方・注意点</h2>
@@ -85,8 +85,8 @@ const settings=[
 ];
 const ids=['games','cz','at','ep','rize','lower','pullTry','pullHit'];
 let eventHistory=[];
-let manualCZ=0, manualAT=0, rizeCZOffset=0;
-const eventNames={czStart:'CZ突入',atStart:'AT突入',atEnd:'AT終了',czMiss:'CZ終了（非当選）'};
+let manualCZ=0, manualAT=0;
+const eventNames={czStart:'CZ突入',atStart:'AT突入',atEnd:'AT終了',czMiss:'CZスルー（8G）'};
 function recalcGames(){
  const start=val('startTotal'), current=val('currentTotal');
  let excluded=0, pendingCZ=null, pendingAT=null, czCount=0, atCount=0, error='';
@@ -111,15 +111,25 @@ function recalcGames(){
  }
  const elapsed=current-start, normal=elapsed-excluded;
  $('games').value=Math.max(0,normal);
- $('cz').value=czCount; $('at').value=atCount;
+ $('cz').value=czCount+manualCZ; $('at').value=atCount+manualAT;
+ refreshLive();
  $('eventStatus').textContent=error||`開始からの経過：${Math.max(0,elapsed)}G ／ CZ・AT除外：${excluded}G ／ 通常時：${Math.max(0,normal)}G`+(pendingCZ!==null?' ／ CZ中（終了記録待ち）':'')+(pendingAT!==null?' ／ AT中（終了記録待ち）':'')+(normal<0?' ／ エラー：除外ゲーム数が経過ゲーム数を超えています':'');
  $('eventLog').innerHTML=eventHistory.map((e,i)=>`${i+1}. ${eventNames[e.type]}：${e.total.toLocaleString()}G`).join('<br>')||'イベント記録はありません。';
  save();
 }
 function recordEvent(type){
- const raw=$('eventTotal').value, n=Number(raw);
- if(raw===''||!Number.isFinite(n)||n<0){$('eventStatus').textContent='イベント発生時の累計総ゲーム数を入力してください。';return;}
- const total=Math.floor(n), start=val('startTotal');
+ const start=val('startTotal');
+ let total;
+ if(type==='czMiss'){
+  // CZスルーはCZ突入から8Gで確定。イベント時ゲーム数の手入力は不要。
+  const pending= [...eventHistory].reverse().find(e=>e.type==='czStart' && !eventHistory.slice(eventHistory.indexOf(e)+1).some(x=>x.type==='atStart'||x.type==='czMiss'));
+  if(!pending){$('eventStatus').textContent='CZスルーを記録する前にCZ突入を記録してください。';return;}
+  total=pending.total+8;
+ }else{
+  const raw=$('eventTotal').value, n=Number(raw);
+  if(raw===''||!Number.isFinite(n)||n<0){$('eventStatus').textContent='イベント発生時の累計ゲーム数を入力してください。';return;}
+  total=Math.floor(n);
+ }
  if(total<start){$('eventStatus').textContent='開始時の累計ゲーム数以上を入力してください。';return;}
  if(eventHistory.length&&total<eventHistory[eventHistory.length-1].total){$('eventStatus').textContent='前回の記録以上の累計ゲーム数を入力してください。';return;}
  eventHistory.push({type,total});
@@ -127,6 +137,19 @@ function recordEvent(type){
  $('eventTotal').value='';recalcGames();
 }
 function val(id){return Math.max(0,Number($(id).value)||0)}
+function actualProbability(g,count){
+ if(g<=0||count<=0)return '—';
+ return '1/'+(g/count).toFixed(1);
+}
+function renderSpec(){
+ const g=val('games'), cz=val('cz'), at=val('at');
+ $('spec').innerHTML=settings.map(x=>`<tr><td>設定${x.s}</td><td>1/${x.cz}</td><td>${actualProbability(g,cz)}</td><td>1/${x.at}</td><td>${actualProbability(g,at)}</td><td>${x.rate}%</td></tr>`).join('');
+}
+function refreshLive(){
+ renderSpec();
+ const g=val('games'), pt=val('pullTry');
+ if(g>0||pt>0) calculate();
+}
 function logPois(k,lambda){if(lambda<=0)return k===0?0:-Infinity;return k*Math.log(lambda)-lambda-lgamma(k+1)}
 function lgamma(z){let p=[676.5203681218851,-1259.1392167224028,771.3234287776531,-176.6150291621406,12.507343278686905,-.13857109526572012,9.984369578019572e-6,1.5056327351493116e-7];if(z<.5)return Math.log(Math.PI)-Math.log(Math.sin(Math.PI*z))-lgamma(1-z);z-=1;let x=.99999999999980993;for(let i=0;i<p.length;i++)x+=p[i]/(z+i+1);let t=z+p.length-.5;return .5*Math.log(2*Math.PI)+(z+.5)*Math.log(t)-t+Math.log(x)}
 function logBin(k,n,p){if(k>n||p<=0||p>=1)return -Infinity;return lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p)}
@@ -157,32 +180,42 @@ function calculate(){
  $('status').textContent='入力データ：'+evidence.join('・')+'。推定比率は入力値と均等事前確率に基づく目安です。';
  save();
 }
-function save(){let d={};ids.forEach(id=>d[id]=$(id).value);d.startTotal=$('startTotal').value;d.currentTotal=$('currentTotal').value;d.eventHistory=eventHistory;d.manualCZ=manualCZ;d.manualAT=manualAT;d.rizeCZOffset=rizeCZOffset;try{localStorage.setItem('tgSettingData',JSON.stringify(d))}catch(e){}}
-function load(){try{let d=JSON.parse(localStorage.getItem('tgSettingData')||'{}');ids.forEach(id=>{if(id!=='games'&&d[id]!==undefined)$(id).value=d[id]});if(d.startTotal!==undefined)$('startTotal').value=d.startTotal;if(d.currentTotal!==undefined)$('currentTotal').value=d.currentTotal;if(Array.isArray(d.eventHistory))eventHistory=d.eventHistory;manualCZ=Number(d.manualCZ)||0;manualAT=Number(d.manualAT)||0;rizeCZOffset=Number(d.rizeCZOffset)||0;}catch(e){}}
+function save(){let d={};ids.forEach(id=>d[id]=$(id).value);d.startTotal=$('startTotal').value;d.currentTotal=$('currentTotal').value;d.eventHistory=eventHistory;d.manualCZ=manualCZ;d.manualAT=manualAT;try{localStorage.setItem('tgSettingData',JSON.stringify(d))}catch(e){}}
+function load(){try{let d=JSON.parse(localStorage.getItem('tgSettingData')||'{}');ids.forEach(id=>{if(id!=='games'&&d[id]!==undefined)$(id).value=d[id]});if(d.startTotal!==undefined)$('startTotal').value=d.startTotal;if(d.currentTotal!==undefined)$('currentTotal').value=d.currentTotal;if(Array.isArray(d.eventHistory))eventHistory=d.eventHistory;manualCZ=Number(d.manualCZ)||0;manualAT=Number(d.manualAT)||0;}catch(e){}}
 // Save every field immediately so navigation/reload does not discard recent input.
 ['startTotal','currentTotal','ep','rize','lower','pullTry','pullHit'].forEach(id=>{
-  $(id).addEventListener('input',()=>{save();});
-  $(id).addEventListener('change',()=>{save();});
+  $(id).addEventListener('input',()=>{save();refreshLive();});
+  $(id).addEventListener('change',()=>{save();refreshLive();});
 });
 $('eventTotal').addEventListener('input',save);
+// CZスルーは自動で8G加算するため、イベントゲーム数欄は使用しない。
+function recordedCount(type){return eventHistory.filter(e=>e.type===type).length;}
+// 手入力分はイベント自動集計分とは別に保持し、合算して表示する。
+['cz','at'].forEach(id=>{
+  const type=id==='cz'?'czStart':'atStart';
+  const updateManual=()=>{
+    const entered=Math.max(0,Math.floor(Number($(id).value)||0));
+    if(id==='cz') manualCZ=Math.max(0,entered-recordedCount(type));
+    else manualAT=Math.max(0,entered-recordedCount(type));
+    recalcGames();
+  };
+  $(id).addEventListener('input',()=>{
+    const entered=Math.max(0,Math.floor(Number($(id).value)||0));
+    if(id==='cz') manualCZ=Math.max(0,entered-recordedCount(type));
+    else manualAT=Math.max(0,entered-recordedCount(type));
+    refreshLive();save();
+  });
+  $(id).addEventListener('change',updateManual);
+});
 document.querySelectorAll('[data-plus]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const id=btn.dataset.plus;
-    const input=$(id);
-    const next=(Number(input.value)||0)+1;
-    if(id==='cz') manualCZ++;
-    if(id==='at') manualAT++;
-    if(id==='rize'){
-      // Rize is counted separately and subtracted from the automatically counted CZ total.
-      input.value=next;
-      rizeCZOffset--;
-      recalcGames();
-    }else if(id==='cz'||id==='at'){
-      recalcGames();
-    }else{
-      input.value=next;
+    if(id==='cz'){manualCZ++;recalcGames();}
+    else if(id==='at'){manualAT++;recalcGames();}
+    else{
+      $(id).value=(Number($(id).value)||0)+1;
+      refreshLive();save();
     }
-    save();
   });
 });
 $('calc').addEventListener('click',calculate);
@@ -190,7 +223,6 @@ $('startTotal').addEventListener('input',()=>{if(val('currentTotal')<val('startT
 $('currentTotal').addEventListener('input',recalcGames);
 ['czStart','atStart','atEnd','czMiss'].forEach(id=>$(id).addEventListener('click',()=>recordEvent(id)));
 $('undoEvent').addEventListener('click',()=>{eventHistory.pop();recalcGames()});
-$('reset').addEventListener('click',()=>{ids.forEach(id=>$(id).value=0);$('startTotal').value=0;$('currentTotal').value=0;$('eventTotal').value='';eventHistory=[];manualCZ=0;manualAT=0;rizeCZOffset=0;try{localStorage.removeItem('tgSettingData')}catch(e){}$('best').textContent='設定 --';$('high').textContent='--%';$('meter').innerHTML='';$('legend').innerHTML='';$('bars').innerHTML='';$('status').textContent='入力をリセットしました。';recalcGames()});
-$('spec').innerHTML=settings.map(x=>`<tr><td>設定${x.s}</td><td>1/${x.cz}</td><td>1/${x.at}</td><td>${x.rate}%</td></tr>`).join('');
-load();recalcGames();if(val('games')>0||val('pullTry')>0)calculate();
+$('reset').addEventListener('click',()=>{ids.forEach(id=>$(id).value=0);$('startTotal').value=0;$('currentTotal').value=0;$('eventTotal').value='';eventHistory=[];manualCZ=0;manualAT=0;try{localStorage.removeItem('tgSettingData')}catch(e){}$('best').textContent='設定 --';$('high').textContent='--%';$('meter').innerHTML='';$('legend').innerHTML='';$('bars').innerHTML='';$('status').textContent='入力をリセットしました。';recalcGames()});
+load();recalcGames();renderSpec();if(val('games')>0||val('pullTry')>0)calculate();
 </script></body></html>
