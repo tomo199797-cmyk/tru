@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="東京喰種 設定判別">
+<meta name="theme-color" content="#111827">
+<title>東京喰種 設定判別</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d30;--panel2:#1d2940;--line:#33415d;--txt:#f3f5fa;--muted:#aab5c8;--red:#e34b62;--gold:#f3c969;--green:#5bd6a0}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#111a2d,#090d18 65%);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;padding:env(safe-area-inset-top) 14px calc(28px + env(safe-area-inset-bottom))}
+main{max-width:720px;margin:auto}.hero{padding:26px 4px 18px}.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--red);font-weight:800}.hero h1{font-size:27px;margin:7px 0 5px}.hero p{margin:0;color:var(--muted);font-size:13px}
+.panel{background:rgba(21,29,48,.96);border:1px solid var(--line);border-radius:17px;padding:17px;margin:13px 0;box-shadow:0 10px 25px #0003}
+h2{font-size:16px;margin:0 0 14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.field input{width:100%;background:#0c1424;border:1px solid #40506e;border-radius:10px;color:white;padding:13px 11px;font-size:18px;font-weight:700;outline:none}.field input:focus{border-color:var(--gold)}.wide{grid-column:1/-1}.counter{display:flex;gap:7px;align-items:center}.counter input{min-width:0;flex:1}.plus{flex:0 0 48px;border:1px solid #596780;border-radius:10px;background:#31415e;color:#fff;font-size:20px;font-weight:800}
+.resulttop{display:flex;align-items:center;justify-content:space-between;gap:12px}.best{font-size:28px;font-weight:900;color:var(--gold)}.sub{font-size:12px;color:var(--muted)}.meter{height:13px;background:#27334a;border-radius:20px;overflow:hidden;display:flex;margin:14px 0 8px}.seg{height:100%}.legend{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.legend div{background:#0d1525;border-radius:9px;padding:9px}.legend b{display:block;font-size:18px}.legend small{color:var(--muted);font-size:11px}
+.rows{display:grid;gap:9px}.r{display:grid;grid-template-columns:58px 1fr 58px;align-items:center;gap:9px;font-size:12px}.track{height:11px;background:#2a354b;border-radius:10px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#d94b61,#f1c76b);border-radius:10px}.pct{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.actions{display:flex;gap:9px;margin-top:12px}.btn{border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:#25334c;color:white;font-size:14px;font-weight:700;flex:1}.btn.primary{background:#9f3048;border-color:#c44b61}.note{font-size:11px;color:var(--muted);line-height:1.65}.pill{display:inline-block;border:1px solid #596780;border-radius:20px;padding:3px 8px;color:#d7dfed;font-size:10px;margin:0 4px 5px 0}
+table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:9px 5px;border-bottom:1px solid #33415d;text-align:right}td:first-child,th:first-child{text-align:left}th{color:var(--muted);font-weight:600}
+footer{text-align:center;color:#78869d;font-size:10px;padding:16px 4px}
+@media(max-width:390px){.grid{gap:9px}.panel{padding:14px}.hero h1{font-size:24px}.field input{font-size:16px}}
+</style>
+</head>
+<body><main>
+<header class="hero"><div class="eyebrow">PACHISLOT ANALYSIS TOOL</div><h1>東京喰種 設定判別</h1><p>実戦データから設定1〜6の推定比率を計算</p></header>
+
+<section class="panel">
+<h2>実戦データ入力</h2>
+<div class="grid">
+<div class="field"><label for="startTotal">開始時の累計ゲーム数（G）</label><input id="startTotal" type="number" min="0" step="1" value="0"></div>
+<div class="field"><label for="currentTotal">現在の累計ゲーム数（G）</label><input id="currentTotal" type="number" min="0" step="1" value="0"></div>
+<div class="field wide"><label for="games">通常時ゲーム数（自動計算・G）</label><input id="games" type="number" min="0" step="1" value="0" readonly></div>
+<div class="field"><label for="cz">CZ回数</label><div class="counter"><input id="cz" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="cz" aria-label="CZ回数を1回加算">＋1</button></div></div>
+<div class="field"><label for="at">AT初当たり回数</label><div class="counter"><input id="at" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="at" aria-label="AT初当たり回数を1回加算">＋1</button></div></div>
+<div class="field"><label for="ep">エピソードボーナス回数</label><div class="counter"><input id="ep" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="ep" aria-label="エピソードボーナス回数を1回加算">＋1</button></div></div>
+<div class="field"><label for="rize">大喰らいの利世回数</label><div class="counter"><input id="rize" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="rize" aria-label="大喰らいの利世回数を1回加算">＋1</button></div></div>
+<div class="field"><label for="lower">下段リプレイ回数</label><div class="counter"><input id="lower" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="lower" aria-label="下段リプレイ回数を1回加算">＋1</button></div></div>
+<div class="field"><label for="pullTry">AT終了後の引戻し確認回数</label><div class="counter"><input id="pullTry" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="pullTry" aria-label="AT終了後の引戻し確認回数を1回加算">＋1</button></div></div>
+<div class="field"><label for="pullHit">引戻し成功回数</label><div class="counter"><input id="pullHit" type="number" min="0" step="1" value="0"><button type="button" class="plus" data-plus="pullHit" aria-label="引戻し成功回数を1回加算">＋1</button></div></div>
+</div>
+<div class="panel" style="margin:14px 0 0;padding:14px;background:#101a2c">
+<h2>遊技中のイベント記録</h2>
+<div class="field"><label for="eventTotal">イベント発生時の累計ゲーム数（G）</label><input id="eventTotal" type="number" min="0" step="1" placeholder="例：1250"></div>
+<div class="grid" style="margin-top:10px">
+<button class="btn" id="czStart">CZ突入</button><button class="btn" id="atStart">AT突入</button>
+<button class="btn" id="atEnd">AT終了</button><button class="btn" id="czMiss">CZ終了（AT非当選）</button>
+</div>
+<div class="actions"><button class="btn" id="undoEvent">直前の記録を取り消す</button></div>
+<p class="note" id="eventStatus">開始時の累計ゲーム数を入力し、イベント発生時にその時点の累計ゲーム数を記録してください。</p>
+<div class="note" id="eventLog">イベント記録はありません。</div>
+</div>
+<div class="actions"><button class="btn primary" id="calc">判別する</button><button class="btn" id="reset">リセット</button></div>
+<p class="note">※開始時の累計ゲーム数から現在の累計ゲーム数までを対象に、CZ中・AT中のゲーム数を除外して通常時ゲーム数を算出します。CZ突入・AT突入回数もイベント記録から自動集計します。</p>
+</section>
+
+<section class="panel" id="result">
+<div class="resulttop"><div><div class="sub">最も可能性が高い設定</div><div class="best" id="best">設定 --</div></div><div style="text-align:right"><div class="sub">設定4以上の推定</div><div class="best" id="high">--%</div></div></div>
+<div class="meter" id="meter"></div><div class="legend" id="legend"></div>
+<h2 style="margin-top:20px">設定別の推定比率</h2><div class="rows" id="bars"></div>
+<p class="note" id="status">ゲーム数と実績を入力して「判別する」を押してください。</p>
+</section>
+
+<section class="panel">
+<h2>設定別の公表数値</h2>
+<table><thead><tr><th>設定</th><th>CZ</th><th>AT初当り</th><th>機械割</th></tr></thead><tbody id="spec"></tbody></table>
+<p class="note">数値は公開解析情報をもとに掲載。機械割は公表値であり、実戦結果を保証するものではありません。</p>
+</section>
+<section class="panel">
+<h2>判別の見方・注意点</h2>
+<span class="pill">AT初当たり</span><span class="pill">CZ確率</span><span class="pill">エピソードボーナス</span><span class="pill">大喰らいの利世</span><span class="pill">引戻し率</span><span class="pill">下段リプレイ</span>
+<p class="note">表示値は、各設定の公表確率を使った簡易ベイズ推定です。設定の事前確率は1〜6を均等とし、各項目を独立に近似して計算しています。実際には抽選契機や状態の影響があるため、厳密なメーカー公式判別値ではありません。サンプルが少ない場合や、特定の演出・示唆がある場合は、数値だけで判断しないでください。確定系の設定示唆はこの確率計算に含めていません。</p>
+</section>
+<footer>データはこの端末のブラウザ内に保存されます。別端末・別ブラウザとは共有されません。</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const settings=[
+ {s:1,cz:262.6,at:394.4,ep:6620.2,rize:2079.1,lower:1260.3,pull:.0781,rate:97.5},
+ {s:2,cz:255.6,at:380.5,ep:5879.7,rize:1906.5,lower:1213.6,pull:.0781,rate:99.0},
+ {s:3,cz:246.5,at:357.0,ep:5114.5,rize:1722.8,lower:1170.3,pull:.0938,rate:101.6},
+ {s:4,cz:233.1,at:325.9,ep:4062.5,rize:1478.9,lower:1129.9,pull:.1094,rate:105.6},
+ {s:5,cz:216.4,at:291.2,ep:3166.7,rize:1226.6,lower:1092.3,pull:.1250,rate:110.3},
+ {s:6,cz:203.7,at:261.3,ep:2639.5,rize:1074.9,lower:1024.0,pull:.1523,rate:114.9}
+];
+const ids=['games','cz','at','ep','rize','lower','pullTry','pullHit'];
+let eventHistory=[];
+let manualCZ=0, manualAT=0, rizeCZOffset=0;
+const eventNames={czStart:'CZ突入',atStart:'AT突入',atEnd:'AT終了',czMiss:'CZ終了（非当選）'};
+function recalcGames(){
+ const start=val('startTotal'), current=val('currentTotal');
+ let excluded=0, pendingCZ=null, pendingAT=null, czCount=0, atCount=0, error='';
+ for(const e of eventHistory){
+  if(e.total<start){error='開始時の累計ゲーム数より前のイベント記録があります。';break;}
+  if(e.type==='czStart'){
+   if(pendingCZ!==null||pendingAT!==null){error='CZ突入の記録順を確認してください。';break;}
+   pendingCZ=e.total; czCount++;
+  }else if(e.type==='atStart'){
+   if(pendingAT!==null){error='AT中にAT突入が記録されています。';break;}
+   if(pendingCZ!==null){if(e.total<pendingCZ){error='ゲーム数の順序が不正です。';break;}excluded+=e.total-pendingCZ;pendingCZ=null;}
+   pendingAT=e.total; atCount++;
+  }else if(e.type==='atEnd'){
+   if(pendingAT===null){error='AT終了の前にAT突入を記録してください。';break;}
+   if(e.total<pendingAT){error='ゲーム数の順序が不正です。';break;}
+   excluded+=e.total-pendingAT;pendingAT=null;
+  }else if(e.type==='czMiss'){
+   if(pendingCZ===null){error='CZ非当選終了の前にCZ突入を記録してください。';break;}
+   if(e.total<pendingCZ){error='ゲーム数の順序が不正です。';break;}
+   excluded+=e.total-pendingCZ;pendingCZ=null;
+  }
+ }
+ const elapsed=current-start, normal=elapsed-excluded;
+ $('games').value=Math.max(0,normal);
+ $('cz').value=czCount; $('at').value=atCount;
+ $('eventStatus').textContent=error||`開始からの経過：${Math.max(0,elapsed)}G ／ CZ・AT除外：${excluded}G ／ 通常時：${Math.max(0,normal)}G`+(pendingCZ!==null?' ／ CZ中（終了記録待ち）':'')+(pendingAT!==null?' ／ AT中（終了記録待ち）':'')+(normal<0?' ／ エラー：除外ゲーム数が経過ゲーム数を超えています':'');
+ $('eventLog').innerHTML=eventHistory.map((e,i)=>`${i+1}. ${eventNames[e.type]}：${e.total.toLocaleString()}G`).join('<br>')||'イベント記録はありません。';
+ save();
+}
+function recordEvent(type){
+ const raw=$('eventTotal').value, n=Number(raw);
+ if(raw===''||!Number.isFinite(n)||n<0){$('eventStatus').textContent='イベント発生時の累計総ゲーム数を入力してください。';return;}
+ const total=Math.floor(n), start=val('startTotal');
+ if(total<start){$('eventStatus').textContent='開始時の累計ゲーム数以上を入力してください。';return;}
+ if(eventHistory.length&&total<eventHistory[eventHistory.length-1].total){$('eventStatus').textContent='前回の記録以上の累計ゲーム数を入力してください。';return;}
+ eventHistory.push({type,total});
+ if(total>val('currentTotal'))$('currentTotal').value=total;
+ $('eventTotal').value='';recalcGames();
+}
+function val(id){return Math.max(0,Number($(id).value)||0)}
+function logPois(k,lambda){if(lambda<=0)return k===0?0:-Infinity;return k*Math.log(lambda)-lambda-lgamma(k+1)}
+function lgamma(z){let p=[676.5203681218851,-1259.1392167224028,771.3234287776531,-176.6150291621406,12.507343278686905,-.13857109526572012,9.984369578019572e-6,1.5056327351493116e-7];if(z<.5)return Math.log(Math.PI)-Math.log(Math.sin(Math.PI*z))-lgamma(1-z);z-=1;let x=.99999999999980993;for(let i=0;i<p.length;i++)x+=p[i]/(z+i+1);let t=z+p.length-.5;return .5*Math.log(2*Math.PI)+(z+.5)*Math.log(t)-t+Math.log(x)}
+function logBin(k,n,p){if(k>n||p<=0||p>=1)return -Infinity;return lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p)}
+function calculate(){
+ const g=val('games'), cz=val('cz'), at=val('at'), ep=val('ep'), rz=val('rize'), lo=val('lower'), pt=val('pullTry'), ph=val('pullHit');
+ if(ph>pt){$('status').textContent='入力エラー：引戻し成功回数は確認回数以下にしてください。';return}
+ if(g===0&&pt===0){$('status').textContent='通常時ゲーム数または引戻し確認回数を入力してください。';return}
+ let logs=settings.map(x=>{
+  let l=0;
+  if(g>0){
+   l+=logPois(cz,g/x.cz);
+   l+=logPois(at,g/x.at);
+   // Rare-event indicators are slightly down-weighted to avoid overconfidence.
+   l+=.75*logPois(ep,g/x.ep);
+   l+=.75*logPois(rz,g/x.rize);
+   l+=.65*logPois(lo,g/x.lower);
+  }
+  if(pt>0)l+=logBin(ph,pt,x.pull);
+  return l;
+ });
+ let max=Math.max(...logs), weights=logs.map(x=>Math.exp(x-max)), sum=weights.reduce((a,b)=>a+b,0), probs=weights.map(x=>x/sum*100);
+ let best=probs.indexOf(Math.max(...probs))+1, high=probs.slice(3).reduce((a,b)=>a+b,0);
+ $('best').textContent='設定 '+best;$('high').textContent=high.toFixed(1)+'%';
+ $('meter').innerHTML=probs.map((p,i)=>`<div class="seg" style="width:${p}%;background:${['#64748b','#8494ad','#4d9b9a','#d19a48','#df704c','#d84b62'][i]}"></div>`).join('');
+ $('legend').innerHTML=probs.map((p,i)=>`<div><small>設定${i+1}</small><b>${p.toFixed(1)}%</b></div>`).join('');
+ $('bars').innerHTML=probs.map((p,i)=>`<div class="r"><b>設定${i+1}</b><div class="track"><div class="fill" style="width:${p}%"></div></div><div class="pct">${p.toFixed(1)}%</div></div>`).join('');
+ let evidence=[];if(g>0){evidence.push(`${g.toLocaleString()}G`);evidence.push(`CZ ${cz}回`);evidence.push(`AT ${at}回`)}if(pt>0)evidence.push(`引戻し ${ph}/${pt}回`);
+ $('status').textContent='入力データ：'+evidence.join('・')+'。推定比率は入力値と均等事前確率に基づく目安です。';
+ save();
+}
+function save(){let d={};ids.forEach(id=>d[id]=$(id).value);d.startTotal=$('startTotal').value;d.currentTotal=$('currentTotal').value;d.eventHistory=eventHistory;d.manualCZ=manualCZ;d.manualAT=manualAT;d.rizeCZOffset=rizeCZOffset;try{localStorage.setItem('tgSettingData',JSON.stringify(d))}catch(e){}}
+function load(){try{let d=JSON.parse(localStorage.getItem('tgSettingData')||'{}');ids.forEach(id=>{if(id!=='games'&&d[id]!==undefined)$(id).value=d[id]});if(d.startTotal!==undefined)$('startTotal').value=d.startTotal;if(d.currentTotal!==undefined)$('currentTotal').value=d.currentTotal;if(Array.isArray(d.eventHistory))eventHistory=d.eventHistory;manualCZ=Number(d.manualCZ)||0;manualAT=Number(d.manualAT)||0;rizeCZOffset=Number(d.rizeCZOffset)||0;}catch(e){}}
+// Save every field immediately so navigation/reload does not discard recent input.
+['startTotal','currentTotal','ep','rize','lower','pullTry','pullHit'].forEach(id=>{
+  $(id).addEventListener('input',()=>{save();});
+  $(id).addEventListener('change',()=>{save();});
+});
+$('eventTotal').addEventListener('input',save);
+document.querySelectorAll('[data-plus]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const id=btn.dataset.plus;
+    const input=$(id);
+    const next=(Number(input.value)||0)+1;
+    if(id==='cz') manualCZ++;
+    if(id==='at') manualAT++;
+    if(id==='rize'){
+      // Rize is counted separately and subtracted from the automatically counted CZ total.
+      input.value=next;
+      rizeCZOffset--;
+      recalcGames();
+    }else if(id==='cz'||id==='at'){
+      recalcGames();
+    }else{
+      input.value=next;
+    }
+    save();
+  });
+});
+$('calc').addEventListener('click',calculate);
+$('startTotal').addEventListener('input',()=>{if(val('currentTotal')<val('startTotal'))$('currentTotal').value=$('startTotal').value;recalcGames()});
+$('currentTotal').addEventListener('input',recalcGames);
+['czStart','atStart','atEnd','czMiss'].forEach(id=>$(id).addEventListener('click',()=>recordEvent(id)));
+$('undoEvent').addEventListener('click',()=>{eventHistory.pop();recalcGames()});
+$('reset').addEventListener('click',()=>{ids.forEach(id=>$(id).value=0);$('startTotal').value=0;$('currentTotal').value=0;$('eventTotal').value='';eventHistory=[];manualCZ=0;manualAT=0;rizeCZOffset=0;try{localStorage.removeItem('tgSettingData')}catch(e){}$('best').textContent='設定 --';$('high').textContent='--%';$('meter').innerHTML='';$('legend').innerHTML='';$('bars').innerHTML='';$('status').textContent='入力をリセットしました。';recalcGames()});
+$('spec').innerHTML=settings.map(x=>`<tr><td>設定${x.s}</td><td>1/${x.cz}</td><td>1/${x.at}</td><td>${x.rate}%</td></tr>`).join('');
+load();recalcGames();if(val('games')>0||val('pullTry')>0)calculate();
+</script></body></html>
